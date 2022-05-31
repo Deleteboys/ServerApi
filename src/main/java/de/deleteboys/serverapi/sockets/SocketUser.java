@@ -46,7 +46,7 @@ public class SocketUser {
                                 if (ServerApi.getMethods().isJson(line)) {
                                     try {
                                         JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(line, JsonObject.class);
-                                        Logger.logPacketsGet(socket.getInputStream() + " " + line);
+                                        Logger.logPacketsGet(socket.getInetAddress() + " " + line);
                                         if (jsonObject.has("packet")) {
                                             for (Packet packet : ServerApi.getPacketManager().getPackets()) {
                                                 if (packet.getPacketName().equals(jsonObject.get("packet").getAsString())) {
