@@ -22,11 +22,11 @@ public class RSA {
         }
     }
 
-    public String encrypt(String message) {
+    public String encrypt(String message, PublicKey key) {
         try {
             byte[] messageToBytes = message.getBytes();
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] encryptedBytes = cipher.doFinal(messageToBytes);
             return encode(encryptedBytes);
         } catch (Exception e) {

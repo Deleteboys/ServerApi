@@ -2,6 +2,7 @@ package de.deleteboys.serverapi.methods;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
 import java.io.BufferedWriter;
@@ -38,6 +39,20 @@ public class Methods {
         }
     }
 
+    public void encryptAndSendPacket(SocketUser socketUser,JsonObject jsonObject) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketUser.getSocket().getOutputStream()));
+            String packet = gson.toJson(jsonObject);
+            String encryptedPacket = socketUser.getRsa().encrypt(packet,socketUser.getClientPublicKey());
+            Logger.logPacketsSend("Encrypted: " + encryptedPacket + " Decrypted:" + packet);
+            writer.write(encryptedPacket);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean isJson(String input) {
         try {
             JsonObject jsonObject = gson.fromJson(input, JsonObject.class);
@@ -50,7 +65,9 @@ public class Methods {
     public void sendJson(Socket s, JsonObject jsonObject) {
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-            writer.write(gson.toJson(jsonObject));
+            String packet = gson.toJson(jsonObject);
+            Logger.logPacketsSend(packet);
+            writer.write(packet);
             writer.newLine();
             writer.flush();
         } catch (IOException e) {

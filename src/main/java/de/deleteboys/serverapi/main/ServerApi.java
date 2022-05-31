@@ -85,4 +85,12 @@ public class ServerApi {
     public static PacketManager getPacketManager() {
         return packetManager;
     }
+
+    public static void setPacketLog(boolean state) {
+        logger.setPacketLog(state);
+    }
+
+    public static boolean isPacketLog() {
+        return logger.isPacketLog();
+    }
 }

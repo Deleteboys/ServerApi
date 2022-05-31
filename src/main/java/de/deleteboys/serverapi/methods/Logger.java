@@ -17,11 +17,28 @@ import java.util.ArrayList;
 public class Logger {
 
     private static ArrayList<String> loggerList = new ArrayList<>();
+    private boolean packetLog = true;
 
     public static void info(String message) {
         String infoString = getCurrentTime() + " [Info] " + message;
         System.out.println(infoString);
         addToLogger(infoString);
+    }
+
+    public static void logPacketsSend(String message) {
+        if (ServerApi.isPacketLog()) {
+            String packetLogString = getCurrentTime() + " [PacketLog send] " + message;
+            System.out.println(packetLogString);
+            addToLogger(packetLogString);
+        }
+    }
+
+    public static void logPacketsGet(String message) {
+        if (ServerApi.isPacketLog()) {
+            String packetLogString = getCurrentTime() + " [PacketLog get] " + message;
+            System.out.println(packetLogString);
+            addToLogger(packetLogString);
+        }
     }
 
     public static void error(String message) {
@@ -73,4 +90,11 @@ public class Logger {
 
     }
 
+    public boolean isPacketLog() {
+        return packetLog;
+    }
+
+    public void setPacketLog(boolean packetLog) {
+        this.packetLog = packetLog;
+    }
 }

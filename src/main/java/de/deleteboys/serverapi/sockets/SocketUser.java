@@ -17,6 +17,7 @@ public class SocketUser {
 
     private Socket socket;
     Thread thread;
+    private RSA rsa;
 
     private PublicKey clientPublicKey;
 
@@ -36,7 +37,7 @@ public class SocketUser {
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     try {
-                        RSA rsa = new RSA();
+                        rsa = new RSA();
                         String publicKey = Base64.getEncoder().encodeToString(rsa.publicKey.getEncoded());
                         ServerApi.getPacketManager().sendPacket(new RSAPacket().init(publicKey), ServerApi.getSocketManager().getSocketUser(socket));
                         while (true) {
@@ -45,6 +46,7 @@ public class SocketUser {
                                 if (ServerApi.getMethods().isJson(line)) {
                                     try {
                                         JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(line, JsonObject.class);
+                                        Logger.logPacketsGet(socket.getInputStream() + " " + line);
                                         if (jsonObject.has("packet")) {
                                             for (Packet packet : ServerApi.getPacketManager().getPackets()) {
                                                 if (packet.getPacketName().equals(jsonObject.get("packet").getAsString())) {
@@ -60,6 +62,7 @@ public class SocketUser {
                                     }
                                 } else {
                                     String decryptedString = rsa.decrypt(line);
+                                    Logger.logPacketsGet(socket.getInetAddress() + " Encrypted: " + line + " Decrypted: " + decryptedString);
                                     if (ServerApi.getMethods().isJson(decryptedString)) {
                                         JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(decryptedString, JsonObject.class);
                                         if (jsonObject.has("packet")) {
@@ -95,5 +98,9 @@ public class SocketUser {
 
     public void setClientPublicKey(PublicKey clientPublicKey) {
         this.clientPublicKey = clientPublicKey;
+    }
+
+    public RSA getRsa() {
+        return rsa;
     }
 }
