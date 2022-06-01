@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import de.deleteboys.serverapi.eventsystem.EventManager;
 import de.deleteboys.serverapi.eventsystem.events.SocketConnectEvent;
 import de.deleteboys.serverapi.main.ServerApi;
+import de.deleteboys.serverapi.packetsystem.packets.RSAPacket;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
 import java.io.BufferedWriter;
@@ -27,8 +28,10 @@ public class Methods {
     }
 
     public void socketConnected(SocketUser socketUser) {
-        ServerApi.getEventManager().fireEvent(new SocketConnectEvent(socketUser));
         Logger.info("Socket Connected " + socketUser.getSocket().getInetAddress());
+        String publicKey = Base64.getEncoder().encodeToString(socketUser.getRsa().publicKey.getEncoded());
+        ServerApi.getPacketManager().sendPacket(new RSAPacket().init(publicKey), socketUser);
+        ServerApi.getEventManager().fireEvent(new SocketConnectEvent(socketUser));
     }
 
     public PublicKey stringToPublicKey(String key) {

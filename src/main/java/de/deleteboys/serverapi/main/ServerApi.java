@@ -20,6 +20,8 @@ public class ServerApi {
     private static EventManager eventManager;
 
     protected static Logger logger;
+    private static boolean logInFile = true;
+    private static boolean consoleLog = true;
     private boolean running = true;
 
     private static String logPath = "log/";
@@ -100,5 +102,21 @@ public class ServerApi {
 
     public static EventManager getEventManager() {
         return eventManager;
+    }
+
+    public static boolean isLogInFile() {
+        return logInFile;
+    }
+
+    public static void setLogInFile(boolean logInFile) {
+        ServerApi.logInFile = logInFile;
+    }
+
+    public static boolean isConsoleLog() {
+        return consoleLog;
+    }
+
+    public static void setConsoleLog(boolean consoleLog) {
+        ServerApi.consoleLog = consoleLog;
     }
 }

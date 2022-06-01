@@ -20,31 +20,43 @@ public class Logger {
     private boolean packetLog = true;
 
     public static void info(String message) {
-        String infoString = getCurrentTime() + " [Info] " + message;
-        System.out.println(infoString);
-        addToLogger(infoString);
+        if (ServerApi.isConsoleLog()) {
+            String infoString = getCurrentTime() + " [Info] " + message;
+            System.out.println(infoString);
+            if (ServerApi.isLogInFile())
+                addToLogger(infoString);
+        }
     }
 
     public static void logPacketsSend(String message) {
-        if (ServerApi.isPacketLog()) {
-            String packetLogString = getCurrentTime() + " [PacketLog send] " + message;
-            System.out.println(packetLogString);
-            addToLogger(packetLogString);
+        if (ServerApi.isConsoleLog()) {
+            if (ServerApi.isPacketLog()) {
+                String packetLogString = getCurrentTime() + " [PacketLog send] " + message;
+                System.out.println(packetLogString);
+                if (ServerApi.isLogInFile())
+                    addToLogger(packetLogString);
+            }
         }
     }
 
     public static void logPacketsGet(String message) {
-        if (ServerApi.isPacketLog()) {
-            String packetLogString = getCurrentTime() + " [PacketLog get] " + message;
-            System.out.println(packetLogString);
-            addToLogger(packetLogString);
+        if (ServerApi.isConsoleLog()) {
+            if (ServerApi.isPacketLog()) {
+                String packetLogString = getCurrentTime() + " [PacketLog get] " + message;
+                System.out.println(packetLogString);
+                if (ServerApi.isLogInFile())
+                    addToLogger(packetLogString);
+            }
         }
     }
 
     public static void error(String message) {
-        String errorString = getCurrentTime() + " [Error] " + message;
-        System.out.println(errorString);
-        addToLogger(errorString);
+        if (ServerApi.isConsoleLog()) {
+            String errorString = getCurrentTime() + " [Error] " + message;
+            System.out.println(errorString);
+            if (ServerApi.isLogInFile())
+                addToLogger(errorString);
+        }
     }
 
     private static String getCurrentTime() {
@@ -73,13 +85,13 @@ public class Logger {
         }
         try {
             Path path = Paths.get(ServerApi.getLogPath());
-            if(!Files.exists(path)) {
+            if (!Files.exists(path)) {
                 Files.createDirectories(path);
             }
             if (file.createNewFile()) {
                 PrintWriter printWriter = new PrintWriter(fileName, StandardCharsets.UTF_8);
                 for (String s : loggerList) {
-                    printWriter.write(s+"\n");
+                    printWriter.write(s + "\n");
                 }
                 printWriter.close();
                 Logger.info("Saved Log " + fileName);

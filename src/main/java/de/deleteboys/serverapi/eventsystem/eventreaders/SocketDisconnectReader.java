@@ -5,6 +5,7 @@ import de.deleteboys.serverapi.eventsystem.EventReader;
 import de.deleteboys.serverapi.eventsystem.events.SocketDisconnectEvent;
 import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.methods.Logger;
+import de.deleteboys.serverapi.sockets.SocketUser;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -15,10 +16,10 @@ public class SocketDisconnectReader extends EventReader {
     public void onEvent(Event event) {
         if (event instanceof SocketDisconnectEvent) {
             try {
-                Socket socket = ((SocketDisconnectEvent) event).getSocket();
-                ServerApi.getSocketManager().removeSocket(ServerApi.getSocketManager().getSocketUser(socket));
-                ServerApi.getMethods().socketDisconnected(socket);
-                socket.close();
+                SocketUser socketUser = ((SocketDisconnectEvent) event).getSocketUser();
+                ServerApi.getSocketManager().removeSocket(socketUser);
+                ServerApi.getMethods().socketDisconnected(socketUser.getSocket());
+                socketUser.getSocket().close();
             } catch (IOException e) {
                 Logger.error(e.getMessage());
             }

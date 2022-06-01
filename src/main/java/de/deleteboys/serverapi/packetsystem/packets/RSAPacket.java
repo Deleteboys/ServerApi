@@ -1,6 +1,7 @@
 package de.deleteboys.serverapi.packetsystem.packets;
 
 import com.google.gson.JsonObject;
+import de.deleteboys.serverapi.eventsystem.events.RSAKeySetEvent;
 import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.packetsystem.Packet;
 import de.deleteboys.serverapi.sockets.SocketUser;
@@ -17,6 +18,7 @@ public class RSAPacket extends Packet {
     public void read(SocketUser s, JsonObject jsonObject) {
         if(jsonObject.has("publicKey")) {
             s.setClientPublicKey(ServerApi.getMethods().stringToPublicKey(jsonObject.get("publicKey").getAsString()));
+            ServerApi.getEventManager().fireEvent(new RSAKeySetEvent(s));
         }
     }
 

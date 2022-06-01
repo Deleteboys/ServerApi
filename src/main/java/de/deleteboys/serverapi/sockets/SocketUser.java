@@ -31,7 +31,6 @@ public class SocketUser {
     }
 
     public void handleInput() {
-        ServerApi.getMethods().socketConnected(this);
         thread = new Thread() {
             @Override
             public void run() {
@@ -39,8 +38,7 @@ public class SocketUser {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     try {
                         rsa = new RSA();
-                        String publicKey = Base64.getEncoder().encodeToString(rsa.publicKey.getEncoded());
-                        ServerApi.getPacketManager().sendPacket(new RSAPacket().init(publicKey), ServerApi.getSocketManager().getSocketUser(socket));
+                        ServerApi.getMethods().socketConnected(ServerApi.getSocketManager().getSocketUser(socket));
                         while (true) {
                             String line = reader.readLine();
                             if (line != null) {
@@ -56,7 +54,7 @@ public class SocketUser {
                                             }
                                         }
                                     } catch (Exception e) {
-                                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
+                                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
                                         stop();
                                     }
                                 } else {
@@ -74,12 +72,12 @@ public class SocketUser {
                                     }
                                 }
                             } else {
-                                ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
+                                ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
                                 stop();
                             }
                         }
                     } catch (SocketException e) {
-                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
+                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
                         stop();
                     }
                 } catch (IOException e) {
