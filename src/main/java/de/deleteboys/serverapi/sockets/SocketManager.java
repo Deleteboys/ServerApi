@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class SocketManager {
 
-    private static ArrayList<SocketUser> socketUsers = new ArrayList<>();
+    private ArrayList<SocketUser> socketUsers = new ArrayList<>();
 
     public SocketUser registerSocket(Socket s) {
         SocketUser socketUser = new SocketUser(s);
@@ -26,4 +26,7 @@ public class SocketManager {
         socketUsers.remove(socketUser);
     }
 
+    public ArrayList<SocketUser> getSocketUsers() {
+        return socketUsers;
+    }
 }

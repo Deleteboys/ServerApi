@@ -21,11 +21,10 @@ public class RSAPacket extends Packet {
     }
 
     @Override
-    public void write(SocketUser s) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("packet", this.getPacketName());
+    public JsonObject write(SocketUser s) {
+        JsonObject jsonObject = createBasePacket();
         jsonObject.addProperty("publicKey", key);
-        ServerApi.getMethods().sendJson(s.getSocket(),jsonObject);
+        return jsonObject;
     }
 
     public RSAPacket init(String key) {

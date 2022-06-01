@@ -1,5 +1,6 @@
 package de.deleteboys.serverapi.packetsystem;
 
+import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.packetsystem.packets.RSAPacket;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
@@ -34,7 +35,11 @@ public class PacketManager {
     }
 
     public void sendPacket(Packet packet, SocketUser s) {
-        packet.write(s);
+        if (s.getClientPublicKey() != null) {
+            ServerApi.getMethods().encryptAndSendPacket(s, packet.write(s));
+        } else {
+            ServerApi.getMethods().sendJson(s.getSocket(),packet.write(s));
+        }
     }
 
     public ArrayList<Packet> getPackets() {

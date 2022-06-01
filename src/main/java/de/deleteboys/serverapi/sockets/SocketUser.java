@@ -1,6 +1,7 @@
 package de.deleteboys.serverapi.sockets;
 
 import com.google.gson.JsonObject;
+import de.deleteboys.serverapi.eventsystem.events.SocketDisconnectEvent;
 import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.methods.Logger;
 import de.deleteboys.serverapi.methods.RSA;
@@ -30,7 +31,7 @@ public class SocketUser {
     }
 
     public void handleInput() {
-        ServerApi.getMethods().socketConnected(socket);
+        ServerApi.getMethods().socketConnected(this);
         thread = new Thread() {
             @Override
             public void run() {
@@ -55,9 +56,7 @@ public class SocketUser {
                                             }
                                         }
                                     } catch (Exception e) {
-                                        ServerApi.getSocketManager().removeSocket(ServerApi.getSocketManager().getSocketUser(socket));
-                                        ServerApi.getMethods().socketDisconnected(socket);
-                                        socket.close();
+                                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
                                         stop();
                                     }
                                 } else {
@@ -74,14 +73,14 @@ public class SocketUser {
                                         }
                                     }
                                 }
+                            } else {
+                                ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
+                                stop();
                             }
                         }
                     } catch (SocketException e) {
-                        ServerApi.getSocketManager().removeSocket(ServerApi.getSocketManager().getSocketUser(socket));
-                        ServerApi.getMethods().socketDisconnected(socket);
-                        socket.close();
+                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(socket));
                         stop();
-                        Logger.error(e.getMessage());
                     }
                 } catch (IOException e) {
                     Logger.error(e.getMessage());

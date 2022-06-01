@@ -2,6 +2,8 @@ package de.deleteboys.serverapi.methods;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.deleteboys.serverapi.eventsystem.EventManager;
+import de.deleteboys.serverapi.eventsystem.events.SocketConnectEvent;
 import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
@@ -24,8 +26,9 @@ public class Methods {
         Logger.info("Socket Disconnected " + socket.getInetAddress());
     }
 
-    public void socketConnected(Socket socket) {
-        Logger.info("Socket Connected " + socket.getInetAddress());
+    public void socketConnected(SocketUser socketUser) {
+        ServerApi.getEventManager().fireEvent(new SocketConnectEvent(socketUser));
+        Logger.info("Socket Connected " + socketUser.getSocket().getInetAddress());
     }
 
     public PublicKey stringToPublicKey(String key) {

@@ -1,5 +1,6 @@
 package de.deleteboys.serverapi.main;
 
+import de.deleteboys.serverapi.eventsystem.EventManager;
 import de.deleteboys.serverapi.methods.Logger;
 import de.deleteboys.serverapi.methods.Methods;
 import de.deleteboys.serverapi.packetsystem.PacketManager;
@@ -16,6 +17,7 @@ public class ServerApi {
     private static Methods methods;
     private static SocketManager socketManager;
     private static PacketManager packetManager;
+    private static EventManager eventManager;
 
     protected static Logger logger;
     private boolean running = true;
@@ -27,6 +29,8 @@ public class ServerApi {
         methods = new Methods();
         socketManager = new SocketManager();
         packetManager = new PacketManager();
+        eventManager = new EventManager();
+        eventManager.init();
         packetManager.init();
         logger = new Logger();
     }
@@ -92,5 +96,9 @@ public class ServerApi {
 
     public static boolean isPacketLog() {
         return logger.isPacketLog();
+    }
+
+    public static EventManager getEventManager() {
+        return eventManager;
     }
 }

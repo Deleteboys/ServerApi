@@ -9,7 +9,7 @@ public abstract class Packet {
 
     public abstract void read(SocketUser s, JsonObject jsonObject);
 
-    public abstract void write(SocketUser s);
+    public abstract JsonObject write(SocketUser s);
 
     public String getPacketName() {
         return packetName;
@@ -17,5 +17,11 @@ public abstract class Packet {
 
     public Packet(String packetName) {
         this.packetName = packetName;
+    }
+
+    public JsonObject createBasePacket() {
+        JsonObject packet = new JsonObject();
+        packet.addProperty("packet", getPacketName());
+        return packet;
     }
 }
