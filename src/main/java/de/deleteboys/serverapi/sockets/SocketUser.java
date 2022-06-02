@@ -44,15 +44,8 @@ public class SocketUser {
                             if (line != null) {
                                 if (ServerApi.getMethods().isJson(line)) {
                                     try {
-                                        JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(line, JsonObject.class);
                                         Logger.logPacketsGet(socket.getInetAddress() + " " + line);
-                                        if (jsonObject.has("packet")) {
-                                            for (Packet packet : ServerApi.getPacketManager().getPackets()) {
-                                                if (packet.getPacketName().equals(jsonObject.get("packet").getAsString())) {
-                                                    packet.read(ServerApi.getSocketManager().getSocketUser(socket), jsonObject);
-                                                }
-                                            }
-                                        }
+                                        ServerApi.getMethods().handelPacketInput(line,socket);
                                     } catch (Exception e) {
                                         ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
                                         stop();
@@ -60,16 +53,7 @@ public class SocketUser {
                                 } else {
                                     String decryptedString = rsa.decrypt(line);
                                     Logger.logPacketsGet(socket.getInetAddress() + " Encrypted: " + line + " Decrypted: " + decryptedString);
-                                    if (ServerApi.getMethods().isJson(decryptedString)) {
-                                        JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(decryptedString, JsonObject.class);
-                                        if (jsonObject.has("packet")) {
-                                            for (Packet packet : ServerApi.getPacketManager().getPackets()) {
-                                                if (packet.getPacketName().equals(jsonObject.get("packet").getAsString())) {
-                                                    packet.read(ServerApi.getSocketManager().getSocketUser(socket), jsonObject);
-                                                }
-                                            }
-                                        }
-                                    }
+                                    ServerApi.getMethods().handelPacketInput(decryptedString,socket);
                                 }
                             } else {
                                 ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
