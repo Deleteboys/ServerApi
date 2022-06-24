@@ -1,11 +1,14 @@
 package de.deleteboys.serverapi.methods;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.deleteboys.serverapi.eventsystem.EventManager;
 import de.deleteboys.serverapi.eventsystem.events.SocketConnectEvent;
 import de.deleteboys.serverapi.main.ServerApi;
 import de.deleteboys.serverapi.packetsystem.Packet;
+import de.deleteboys.serverapi.packetsystem.PacketSplitType;
 import de.deleteboys.serverapi.packetsystem.packets.RSAPacket;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
@@ -27,7 +30,8 @@ public class Methods {
 
     public Gson gson = new Gson();
 
-    private ConcurrentHashMap<String,String> splitPacket = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, String> splitPacket = new ConcurrentHashMap<>();
+
     public void socketDisconnected(Socket socket) {
         Logger.info("Socket Disconnected " + socket.getInetAddress());
     }
@@ -35,8 +39,8 @@ public class Methods {
     public void socketConnected(SocketUser socketUser) {
         Logger.info("Socket Connected " + socketUser.getSocket().getInetAddress());
         String publicKey = Base64.getEncoder().encodeToString(socketUser.getRsa().publicKey.getEncoded());
-        ServerApi.getPacketManager().sendPacket(new RSAPacket().init(publicKey), socketUser);
-        ServerApi.getEventManager().fireEvent(new SocketConnectEvent(socketUser));
+        ServerApi.getServerApi().getPacketManager().sendPacket(new RSAPacket().init(publicKey), socketUser);
+        ServerApi.getServerApi().getEventManager().fireEvent(new SocketConnectEvent(socketUser));
     }
 
     public PublicKey stringToPublicKey(String key) {
@@ -52,29 +56,50 @@ public class Methods {
 
     public void sendSplitPacket(JsonObject jsonObject, SocketUser socketUser) {
         try {
-            String originalPacket = jsonObject.get("originalPacket").getAsString();
+            String packetSplitType = jsonObject.get("PacketSplitType").getAsString();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketUser.getSocket().getOutputStream()));
-            String encryptedPacket = socketUser.getRsa().encrypt(originalPacket, socketUser.getClientPublicKey());
-            JsonObject newPacket = new JsonObject();
-            newPacket.addProperty("packet",jsonObject.get("packet").getAsString());
-            newPacket.addProperty("id",jsonObject.get("id").getAsString());
-            newPacket.addProperty("index",jsonObject.get("index").getAsString());
-            newPacket.addProperty("size",jsonObject.get("size").getAsString());
-            newPacket.addProperty("originalPacket",encryptedPacket);
-            String packetAsString = gson.toJson(newPacket);
-            Logger.logPacketsSend(packetAsString);
-            writer.write(packetAsString);
-            writer.newLine();
-            writer.flush();
+            if (PacketSplitType.valueOf(packetSplitType) == PacketSplitType.DEFAULT) {
+                String originalPacket = jsonObject.get("originalPacket").getAsString();
+                String encryptedPacket = socketUser.getRsa().encrypt(originalPacket, socketUser.getClientPublicKey());
+                JsonObject newPacket = new JsonObject();
+                newPacket.addProperty("packet", jsonObject.get("packet").getAsString());
+                newPacket.addProperty("id", jsonObject.get("id").getAsString());
+                newPacket.addProperty("index", jsonObject.get("index").getAsString());
+                newPacket.addProperty("size", jsonObject.get("size").getAsString());
+                newPacket.addProperty("originalPacket", encryptedPacket);
+                newPacket.addProperty("PacketSplitType", packetSplitType);
+                String packetAsString = gson.toJson(newPacket);
+                Logger.logPacketsSend(packetAsString);
+                writer.write(packetAsString);
+                writer.newLine();
+                writer.flush();
+            } else if (PacketSplitType.valueOf(packetSplitType) == PacketSplitType.ONELARGE) {
+                JsonArray jsonArray = jsonObject.get("packetList").getAsJsonArray();
+                JsonArray encryptedStrings = new JsonArray();
+                for (JsonElement jsonElement : jsonArray) {
+                    encryptedStrings.add(socketUser.getRsa().encrypt(jsonElement.getAsString(), socketUser.getClientPublicKey()));
+                }
+                JsonObject newPacket = new JsonObject();
+                newPacket.addProperty("packet", jsonObject.get("packet").getAsString());
+                newPacket.addProperty("id", jsonObject.get("id").getAsString());
+                newPacket.add("packetList", encryptedStrings);
+                newPacket.addProperty("packetSplitType", packetSplitType);
+                String packetAsString = gson.toJson(newPacket);
+                Logger.logPacketsSend(packetAsString);
+                writer.write(packetAsString);
+                writer.newLine();
+                writer.flush();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public void encryptAndSendPacket(SocketUser socketUser,JsonObject jsonObject) {
+
+    public void encryptAndSendPacket(SocketUser socketUser, JsonObject jsonObject) {
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketUser.getSocket().getOutputStream()));
             String packet = gson.toJson(jsonObject);
-            String encryptedPacket = socketUser.getRsa().encrypt(packet,socketUser.getClientPublicKey());
+            String encryptedPacket = socketUser.getRsa().encrypt(packet, socketUser.getClientPublicKey());
             Logger.logPacketsSend("Encrypted: " + encryptedPacket + " Decrypted:" + packet);
             writer.write(encryptedPacket);
             writer.newLine();
@@ -121,12 +146,12 @@ public class Methods {
     }
 
     public void handelPacketInput(String input, Socket socket) {
-        if (ServerApi.getMethods().isJson(input)) {
-            JsonObject jsonObject = ServerApi.getMethods().gson.fromJson(input, JsonObject.class);
+        if (ServerApi.getServerApi().getMethods().isJson(input)) {
+            JsonObject jsonObject = ServerApi.getServerApi().getMethods().gson.fromJson(input, JsonObject.class);
             if (jsonObject.has("packet")) {
-                for (Packet packet : ServerApi.getPacketManager().getPackets()) {
+                for (Packet packet : ServerApi.getServerApi().getPacketManager().getPackets()) {
                     if (packet.getPacketName().equals(jsonObject.get("packet").getAsString())) {
-                        packet.read(ServerApi.getSocketManager().getSocketUser(socket), jsonObject);
+                        packet.read(ServerApi.getServerApi().getSocketManager().getSocketUser(socket), jsonObject);
                     }
                 }
             }

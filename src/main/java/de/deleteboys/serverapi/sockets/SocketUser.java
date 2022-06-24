@@ -38,30 +38,30 @@ public class SocketUser {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     try {
                         rsa = new RSA();
-                        ServerApi.getMethods().socketConnected(ServerApi.getSocketManager().getSocketUser(socket));
+                        ServerApi.getServerApi().getMethods().socketConnected(ServerApi.getServerApi().getSocketManager().getSocketUser(socket));
                         while (true) {
                             String line = reader.readLine();
                             if (line != null) {
-                                if (ServerApi.getMethods().isJson(line)) {
+                                if (ServerApi.getServerApi().getMethods().isJson(line)) {
                                     try {
                                         Logger.logPacketsGet(socket.getInetAddress() + " " + line);
-                                        ServerApi.getMethods().handelPacketInput(line,socket);
+                                        ServerApi.getServerApi().getMethods().handelPacketInput(line,socket);
                                     } catch (Exception e) {
-                                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
+                                        ServerApi.getServerApi().getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getServerApi().getSocketManager().getSocketUser(socket)));
                                         stop();
                                     }
                                 } else {
                                     String decryptedString = rsa.decrypt(line);
                                     Logger.logPacketsGet(socket.getInetAddress() + " Encrypted: " + line + " Decrypted: " + decryptedString);
-                                    ServerApi.getMethods().handelPacketInput(decryptedString,socket);
+                                    ServerApi.getServerApi().getMethods().handelPacketInput(decryptedString,socket);
                                 }
                             } else {
-                                ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
+                                ServerApi.getServerApi().getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getServerApi().getSocketManager().getSocketUser(socket)));
                                 stop();
                             }
                         }
                     } catch (SocketException e) {
-                        ServerApi.getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getSocketManager().getSocketUser(socket)));
+                        ServerApi.getServerApi().getEventManager().fireEvent(new SocketDisconnectEvent(ServerApi.getServerApi().getSocketManager().getSocketUser(socket)));
                         stop();
                     }
                 } catch (IOException e) {

@@ -17,8 +17,8 @@ public class SocketDisconnectReader extends EventReader {
         if (event instanceof SocketDisconnectEvent) {
             try {
                 SocketUser socketUser = ((SocketDisconnectEvent) event).getSocketUser();
-                ServerApi.getSocketManager().removeSocket(socketUser);
-                ServerApi.getMethods().socketDisconnected(socketUser.getSocket());
+                ServerApi.getServerApi().getSocketManager().removeSocket(socketUser);
+                ServerApi.getServerApi().getMethods().socketDisconnected(socketUser.getSocket());
                 socketUser.getSocket().close();
             } catch (IOException e) {
                 Logger.error(e.getMessage());

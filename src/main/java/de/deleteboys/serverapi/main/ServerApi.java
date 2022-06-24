@@ -4,6 +4,7 @@ import de.deleteboys.serverapi.eventsystem.EventManager;
 import de.deleteboys.serverapi.methods.Logger;
 import de.deleteboys.serverapi.methods.Methods;
 import de.deleteboys.serverapi.packetsystem.PacketManager;
+import de.deleteboys.serverapi.packetsystem.PacketSplitType;
 import de.deleteboys.serverapi.sockets.SocketManager;
 import de.deleteboys.serverapi.sockets.SocketUser;
 
@@ -18,12 +19,13 @@ public class ServerApi {
     private static SocketManager socketManager;
     private static PacketManager packetManager;
     private static EventManager eventManager;
-
     protected static Logger logger;
     private static boolean logInFile = true;
     private static boolean consoleLog = true;
     private boolean running = true;
+    private PacketSplitType packetSplitType = PacketSplitType.DEFAULT;
 
+    private static ServerApi serverApi;
     private static String logPath = "log/";
 
     public ServerApi(int port) {
@@ -35,6 +37,7 @@ public class ServerApi {
         eventManager.init();
         packetManager.init();
         logger = new Logger();
+        serverApi = this;
     }
 
     public void startServer() {
@@ -68,55 +71,67 @@ public class ServerApi {
         this.running = running;
     }
 
-    public static void saveCurrentLog() {
+    public void saveCurrentLog() {
         logger.saveLog();
     }
 
-    public static String getLogPath() {
+    public String getLogPath() {
         return logPath;
     }
 
-    public static void setLogPath(String logPath) {
+    public void setLogPath(String logPath) {
         ServerApi.logPath = logPath;
     }
 
-    public static Methods getMethods() {
+    public Methods getMethods() {
         return methods;
     }
 
-    public static SocketManager getSocketManager() {
+    public SocketManager getSocketManager() {
         return socketManager;
     }
 
-    public static PacketManager getPacketManager() {
+    public PacketManager getPacketManager() {
         return packetManager;
     }
 
-    public static void setPacketLog(boolean state) {
+    public void setPacketLog(boolean state) {
         logger.setPacketLog(state);
     }
 
-    public static boolean isPacketLog() {
+    public boolean isPacketLog() {
         return logger.isPacketLog();
     }
 
-    public static EventManager getEventManager() {
+    public EventManager getEventManager() {
         return eventManager;
     }
 
-    public static boolean isLogInFile() {
+    public boolean isLogInFile() {
         return logInFile;
     }
 
-    public static void setLogInFile(boolean logInFile) {
+    public void setLogInFile(boolean logInFile) {
         ServerApi.logInFile = logInFile;
     }
 
-    public static boolean isConsoleLog() {
+    public boolean isConsoleLog() {
         return consoleLog;
     }
 
-    public static void setConsoleLog(boolean consoleLog) {
+    public void setConsoleLog(boolean consoleLog) {
         ServerApi.consoleLog = consoleLog;
+    }
+
+    public static ServerApi getServerApi() {
+        return serverApi;
+    }
+
+    public PacketSplitType getPacketSplitType() {
+        return packetSplitType;
+    }
+
+    public void setPacketSplitType(PacketSplitType packetSplitType) {
+        this.packetSplitType = packetSplitType;
     }
 }

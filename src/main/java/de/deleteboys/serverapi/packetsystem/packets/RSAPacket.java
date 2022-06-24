@@ -17,8 +17,8 @@ public class RSAPacket extends Packet {
     @Override
     public void read(SocketUser s, JsonObject jsonObject) {
         if(jsonObject.has("publicKey")) {
-            s.setClientPublicKey(ServerApi.getMethods().stringToPublicKey(jsonObject.get("publicKey").getAsString()));
-            ServerApi.getEventManager().fireEvent(new RSAKeySetEvent(s));
+            s.setClientPublicKey(ServerApi.getServerApi().getMethods().stringToPublicKey(jsonObject.get("publicKey").getAsString()));
+            ServerApi.getServerApi().getEventManager().fireEvent(new RSAKeySetEvent(s));
         }
     }
 
